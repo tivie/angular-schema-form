@@ -39,8 +39,27 @@ export default function(sfValidator, $parse, sfSelect) {
           return viewValue;
         }
 
-        var result =  sfValidator(form, viewValue);
-        //console.log('result is', result)
+				// fix problem with dates
+        if (form.type === 'date' && form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time')) {
+          if (viewValue instanceof Date) {
+
+            viewValue = (function(date) {
+              var mm = date.getMonth() + 1; // getMonth() is zero-based
+              var dd = date.getDate();
+              return [date.getFullYear(),
+                (mm > 9 ? '' : '0') + mm,
+                (dd > 9 ? '' : '0') + dd
+              ].join('-');
+            })(viewValue);
+
+          } else if (viewValue === null) {
+              viewValue = '';
+          }
+        }
+				
+				
+        let result = sfValidator(form, viewValue);
+        // console.log('result is', result)
         // Since we might have different tv4 errors we must clear all
         // errors that start with tv4-
         Object.keys(ngModel.$error)
