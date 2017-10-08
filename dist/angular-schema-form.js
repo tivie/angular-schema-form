@@ -1,7 +1,7 @@
 /*!
  * angular-schema-form
  * @version 1.0.0-alpha.4
- * @date Sat, 15 Apr 2017 08:27:27 GMT
+ * @date Sun, 08 Oct 2017 00:44:17 GMT
  * @link https://github.com/json-schema-form/angular-schema-form
  * @license MIT
  * Copyright (c) 2014-2017 JSON Schema Form
@@ -14,9 +14,9 @@
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -86,8 +86,8 @@ module.exports = angular;
 
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
  * json-schema-form-core
- * @version 1.0.0-alpha.4
- * @date Sat, 15 Apr 2017 08:25:55 GMT
+ * @version 1.0.0-alpha.2
+ * @date Sun, 19 Feb 2017 13:06:51 GMT
  * @link https://github.com/json-schema-form/json-schema-form-core
  * @license MIT
  * Copyright (c) 2014-2017 JSON Schema Form
@@ -2237,13 +2237,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
 // export function merge(schema, form, schemaDefaultTypes, ignore, options, readonly, asyncTemplates) {
-function merge(lookup, form) {
-  var typeDefaults = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__schema_defaults__["createDefaults"])();
-  var ignore = arguments[3];
-  var options = arguments[4];
-  var readonly = arguments[5];
-  var asyncTemplates = arguments[6];
-
+function merge(lookup, form, ignore, options, readonly, asyncTemplates) {
   var formItems = [];
   var formItemRest = [];
   form = form || [];
@@ -2254,7 +2248,7 @@ function merge(lookup, form) {
   var idxRest = form.indexOf('...');
   if ((typeof lookup === 'undefined' ? 'undefined' : _typeof(lookup)) === 'object' && lookup.hasOwnProperty('properties')) {
     readonly = readonly || lookup.readonly || lookup.readOnly;
-    stdForm = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__schema_defaults__["defaultForm"])(lookup, typeDefaults, ignore, options);
+    stdForm = __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__schema_defaults__["defaultForm"])(lookup, __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__schema_defaults__["createDefaults"])(), ignore, options);
 
     var defaultFormLookup = stdForm.lookup;
 
@@ -2338,27 +2332,22 @@ function merge(lookup, form) {
 
     // if it's a type with items, merge 'em!
     if (obj.items) {
-      obj.items = merge(lookup, obj.items, typeDefaults, ignore, options, obj.readonly, asyncTemplates);
+      obj.items = merge(lookup, obj.items, ignore, options, obj.readonly, asyncTemplates);
     }
 
     // if its has tabs, merge them also!
     if (obj.tabs) {
       obj.tabs.forEach(function (tab) {
         if (tab.items) {
-          tab.items = merge(lookup, tab.items, typeDefaults, ignore, options, obj.readonly, asyncTemplates);
+          tab.items = merge(lookup, tab.items, ignore, options, obj.readonly, asyncTemplates);
         }
       });
     }
 
     // Special case: checkbox
     // Since have to ternary state we need a default
-    if (obj.type === 'checkbox') {
-      // Check for schema property, as the checkbox may be part of the explicitly defined form
-      if (obj.schema === undefined) {
-        obj.schema = { default: false };
-      } else if (obj.schema['default'] === undefined) {
-        obj.schema['default'] = false;
-      };
+    if (obj.type === 'checkbox' && obj.schema['default'] === undefined) {
+      obj.schema['default'] = false;
     };
 
     // Special case: template type with tempplateUrl that's needs to be loaded before rendering
@@ -2366,7 +2355,7 @@ function merge(lookup, form) {
     // is introduced since we need to go async then anyway
     if (asyncTemplates && obj.type === 'template' && !obj.template && obj.templateUrl) {
       asyncTemplates.push(obj);
-    };
+    }
 
     return obj;
   });
@@ -2596,7 +2585,7 @@ function validate(form, value) {
   };
 
   var valueWrap = {};
-  if (typeof value !== 'undefined') {
+  if (!!value) {
     valueWrap[propName] = value;
   };
 
@@ -2842,7 +2831,7 @@ __WEBPACK_IMPORTED_MODULE_1_angular___default.a.module('schemaForm', deps)
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_angular___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_angular__);
 
 
-/* harmony default export */ __webpack_exports__["a"] = function (sfValidator, $parse, sfSelect) {
+/* harmony default export */ __webpack_exports__["a"] = (function (sfValidator, $parse, sfSelect) {
   return {
     restrict: 'A',
     scope: false,
@@ -2881,8 +2870,22 @@ __WEBPACK_IMPORTED_MODULE_1_angular___default.a.module('schemaForm', deps)
           return viewValue;
         }
 
+        // fix problem with dates
+        if (form.type === 'date' && form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time')) {
+          if (viewValue instanceof Date) {
+
+            viewValue = function (date) {
+              var mm = date.getMonth() + 1; // getMonth() is zero-based
+              var dd = date.getDate();
+              return [date.getFullYear(), (mm > 9 ? '' : '0') + mm, (dd > 9 ? '' : '0') + dd].join('-');
+            }(viewValue);
+          } else if (viewValue === null) {
+            viewValue = '';
+          }
+        }
+
         var result = sfValidator(form, viewValue);
-        //console.log('result is', result)
+        // console.log('result is', result)
         // Since we might have different tv4 errors we must clear all
         // errors that start with tv4-
         Object.keys(ngModel.$error).filter(function (k) {
@@ -3021,7 +3024,7 @@ __WEBPACK_IMPORTED_MODULE_1_angular___default.a.module('schemaForm', deps)
       };
     }
   };
-};
+});
 
 /***/ }),
 /* 6 */
@@ -3037,7 +3040,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 /**
  * Directive that handles the model arrays
  */
-/* harmony default export */ __webpack_exports__["a"] = function (sfSelect, sfPath, schemaForm) {
+/* harmony default export */ __webpack_exports__["a"] = (function (sfSelect, sfPath, schemaForm) {
   return {
     scope: true,
     controller: ['$scope', function SFArrayController($scope) {
@@ -3268,7 +3271,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       };
     }
   };
-};
+});
 
 /***/ }),
 /* 7 */
@@ -3286,7 +3289,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
  * Takes the form definition as argument.
  * If the form definition has a "onChange" defined as either a function or
  */
-/* harmony default export */ __webpack_exports__["a"] = function () {
+/* harmony default export */ __webpack_exports__["a"] = (function () {
   return {
     require: 'ngModel',
     restrict: 'AC',
@@ -3314,7 +3317,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
     }
   };
-};
+});
 
 /***/ }),
 /* 8 */
@@ -3327,7 +3330,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
 
-/* harmony default export */ __webpack_exports__["a"] = function ($parse, $compile, $http, $templateCache, $interpolate, $q, sfErrorMessage, sfPath, sfSelect) {
+/* harmony default export */ __webpack_exports__["a"] = (function ($parse, $compile, $http, $templateCache, $interpolate, $q, sfErrorMessage, sfPath, sfSelect) {
 
   var keyFormat = {
     COMPLETE: '*',
@@ -3648,7 +3651,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
     }
   };
-};
+});
 
 /***/ }),
 /* 9 */
@@ -3658,7 +3661,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 /**
  * Directive that handles keys and array indexes
  */
-/* harmony default export */ __webpack_exports__["a"] = function (schemaForm, sfPath) {
+/* harmony default export */ __webpack_exports__["a"] = (function (schemaForm, sfPath) {
   return {
     scope: true,
     require: ['?^^sfNewArray'],
@@ -3687,7 +3690,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       }
     }
   };
-};;
+});;
 
 /***/ }),
 /* 10 */
@@ -3698,7 +3701,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_angular___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_angular__);
 
 
-/* harmony default export */ __webpack_exports__["a"] = function ($injector, sfErrorMessage) {
+/* harmony default export */ __webpack_exports__["a"] = (function ($injector, sfErrorMessage) {
 
   //Inject sanitizer if it exists
   var $sanitize = $injector.has('$sanitize') ? $injector.get('$sanitize') : function (html) {
@@ -3791,7 +3794,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
       });
     }
   };
-};
+});
 
 /***/ }),
 /* 11 */
@@ -3807,7 +3810,7 @@ FIXME: real documentation
 <form sf-form="form"  sf-schema="schema" sf-decorator="foobar"></form>
 */
 
-/* harmony default export */ __webpack_exports__["a"] = function ($compile, $http, $templateCache, $q, schemaForm, schemaFormDecorators, sfSelect, sfPath, sfBuilder) {
+/* harmony default export */ __webpack_exports__["a"] = (function ($compile, $http, $templateCache, $q, schemaForm, schemaFormDecorators, sfSelect, sfPath, sfBuilder) {
 
   return {
     scope: {
@@ -4021,7 +4024,7 @@ FIXME: real documentation
       };
     }
   };
-};
+});
 
 /***/ }),
 /* 12 */
@@ -4032,7 +4035,7 @@ FIXME: real documentation
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_angular___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_angular__);
 
 
-/* harmony default export */ __webpack_exports__["a"] = function ($compileProvider, sfPathProvider) {
+/* harmony default export */ __webpack_exports__["a"] = (function ($compileProvider, sfPathProvider) {
   var defaultDecorator = '';
   var decorators = {};
 
@@ -4452,11 +4455,11 @@ FIXME: real documentation
    * @param {string} name directive name (CamelCased)
    * @param {Object} fields, an object that maps "type" => `{ template, builder, replace}`.
                      attributes `builder` and `replace` are optional, and replace defaults to true.
-                       `template` should be the key of the template to load and it should be pre-loaded
+                      `template` should be the key of the template to load and it should be pre-loaded
                      in `$templateCache`.
-                       `builder` can be a function or an array of functions. They will be called in
+                      `builder` can be a function or an array of functions. They will be called in
                      the order they are supplied.
-                       `replace` (DEPRECATED) is for backwards compatability. If false the builder
+                      `replace` (DEPRECATED) is for backwards compatability. If false the builder
                      will use the "old" way of building that form field using a <sf-decorator>
                      directive.
    */
@@ -4564,7 +4567,7 @@ FIXME: real documentation
 
   //Create a default directive
   createDirective('sfDecorator');
-};;
+});;
 
 /***/ }),
 /* 13 */
@@ -4582,7 +4585,7 @@ FIXME: real documentation
 /**
  * Schema form service.
  */
-/* harmony default export */ __webpack_exports__["a"] = function () {
+/* harmony default export */ __webpack_exports__["a"] = (function () {
   var postProcessFn = function postProcessFn(form) {
     return form;
   };
@@ -4703,7 +4706,7 @@ FIXME: real documentation
 
     return service;
   };
-};
+});
 
 /***/ }),
 /* 14 */
@@ -4712,7 +4715,7 @@ FIXME: real documentation
 "use strict";
 
 // FIXME: type template (using custom builder)
-/* harmony default export */ __webpack_exports__["a"] = function (sfPathProvider) {
+/* harmony default export */ __webpack_exports__["a"] = (function (sfPathProvider) {
 
   var SNAKE_CASE_REGEXP = /[A-Z]/g;
   var snakeCase = function snakeCase(name, separator) {
@@ -5031,7 +5034,7 @@ FIXME: real documentation
       internalBuild: _build
     };
   }];
-};
+});
 
 /***/ }),
 /* 15 */
@@ -5042,7 +5045,7 @@ FIXME: real documentation
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_angular___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_angular__);
 
 
-/* harmony default export */ __webpack_exports__["a"] = function () {
+/* harmony default export */ __webpack_exports__["a"] = (function () {
 
   // The codes are tv4 error codes.
   // Not all of these can actually happen in a field, but for
@@ -5168,7 +5171,7 @@ FIXME: real documentation
 
     return service;
   }];
-};
+});
 
 /***/ }),
 /* 16 */
@@ -5208,7 +5211,7 @@ var sfPathProviderClass = function () {
   return sfPathProviderClass;
 }();
 
-/* harmony default export */ __webpack_exports__["a"] = sfPathProviderClass;
+/* harmony default export */ __webpack_exports__["a"] = (sfPathProviderClass);
 
 /***/ }),
 /* 17 */
@@ -5384,6 +5387,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
