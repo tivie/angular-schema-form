@@ -1,7 +1,7 @@
 /*!
  * angular-schema-form
  * @version 1.0.0-alpha.4
- * @date Fri, 03 Nov 2017 23:33:00 GMT
+ * @date Fri, 03 Nov 2017 23:39:55 GMT
  * @link https://github.com/json-schema-form/angular-schema-form
  * @license MIT
  * Copyright (c) 2014-2017 JSON Schema Form
@@ -2871,7 +2871,7 @@ __WEBPACK_IMPORTED_MODULE_1_angular___default.a.module('schemaForm', deps)
         }
 
         // fix problem with dates
-        if (form.type === 'date-to-string' && form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time') || form.schema.type === 'object') {
+        if (form.type === 'date' && (form.schema.type === 'object' || form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time'))) {
           if (viewValue instanceof Date) {
             viewValue = function (date) {
               var mm = date.getMonth() + 1; // getMonth() is zero-based
@@ -2883,7 +2883,7 @@ __WEBPACK_IMPORTED_MODULE_1_angular___default.a.module('schemaForm', deps)
           }
         }
 
-        if (form.type === 'date' && form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time') || form.schema.type === 'object') {
+        if (form.type === 'date' && (form.schema.type === 'object' || form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time'))) {
           if (viewValue instanceof Date) {
             viewValue = viewValue.toISOString();
           } else if (viewValue === null) {

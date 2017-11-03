@@ -40,9 +40,11 @@ export default function(sfValidator, $parse, sfSelect) {
         }
 
         // fix problem with dates
-        if (form.type === 'date-to-string' &&
-          (form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time')) ||
-          (form.schema.type === 'object')
+        if (form.type === 'date' &&
+          (
+            form.schema.type === 'object' ||
+            (form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time'))
+          )
         ){
           if (viewValue instanceof Date) {
             viewValue = (function(date) {
@@ -60,8 +62,10 @@ export default function(sfValidator, $parse, sfSelect) {
         }
 
         if (form.type === 'date' &&
-          (form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time')) ||
-          (form.schema.type === 'object')
+          (
+            form.schema.type === 'object' ||
+            (form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time'))
+          )
         ){
           if (viewValue instanceof Date) {
             viewValue = viewValue.toISOString();
