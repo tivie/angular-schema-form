@@ -39,10 +39,12 @@ export default function(sfValidator, $parse, sfSelect) {
           return viewValue;
         }
 
-				// fix problem with dates
-        if (form.type === 'date' && form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time')) {
+        // fix problem with dates
+        if (form.type === 'date-to-string' &&
+          (form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time')) ||
+          (form.schema.type === 'object')
+        ){
           if (viewValue instanceof Date) {
-
             viewValue = (function(date) {
               var mm = date.getMonth() + 1; // getMonth() is zero-based
               var dd = date.getDate();
@@ -54,6 +56,17 @@ export default function(sfValidator, $parse, sfSelect) {
 
           } else if (viewValue === null) {
               viewValue = '';
+          }
+        }
+
+        if (form.type === 'date' &&
+          (form.schema.type === 'string' && (form.schema.format === 'date' || form.schema.format === 'date-time')) ||
+          (form.schema.type === 'object')
+        ){
+          if (viewValue instanceof Date) {
+            viewValue = viewValue.toISOString();
+          } else if (viewValue === null) {
+            viewValue = '';
           }
         }
 				
